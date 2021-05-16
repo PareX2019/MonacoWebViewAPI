@@ -1,0 +1,192 @@
+﻿<!DOCTYPE html>
+
+<html lang="en" xmlns="http://www.w3.org/1999/xhtml">
+
+<head>
+	<style type="text/css">
+		html,
+		body {
+			width: 100%;
+			height: 100%;
+			margin: 0;
+			padding: 0;
+			overflow: hidden;
+		}
+	</style>
+	<meta charset="utf-8" />
+	<title></title>
+</head>
+
+<body>
+	<div id="container" style="width:100%;height:100%;"></div>
+	<script src="vs/loader.js"></script>
+	<script type="text/javascript">
+		require.config({
+			paths: {
+				'vs': 'vs'
+			}
+		});
+
+		var editor;
+		var Proposals = [];
+
+		var SetText;
+		var GetText;
+		var AddIntellisense;
+		var Refresh;
+
+		require(['vs/editor/editor.main'], function () {
+			function getDependencyProposals() {
+				return Proposals;
+			}
+			
+			monaco.languages.registerCompletionItemProvider('lua', {
+				provideCompletionItems: function (model, position) {
+					return getDependencyProposals();
+				},
+				
+			});
+
+
+			monaco.editor.defineTheme('net-theme-dark', {
+				base: 'vs-dark',
+				inherit: true,
+				colors: {
+					"editor.background": '#191919',//ur background color
+				},
+				rules: [{
+						token: 'global',
+						foreground: 'FFFFFF',
+						fontStyle: "bold"
+					},
+					{
+						token: 'keyword',
+						foreground: 'ff6a00',
+						fontStyle: "bold"
+					},
+					{
+						token: 'comment',
+						foreground: '666666'
+					},
+					{
+						token: 'number',
+						foreground: 'ffc600'
+					},
+					{
+						token: 'string',
+						foreground: 'ff8c3a'
+					},
+				]
+			});
+
+			editor = monaco.editor.create(document.getElementById('container'), {
+				language: 'lua',
+				theme: "net-theme-dark",
+				acceptSuggestionOnEnter: "smart",
+				suggestOnTriggerCharacters: true,
+				suggestSelection : "recentlyUsed",
+				folding: true,
+				scrollbar: {
+					verticalHasArrows: true,
+				},
+				dragAndDrop: true,
+				links: false,
+				minimap: {
+					enabled: false,
+				},
+				showFoldingControls: "always",
+				smoothScrolling: true,
+			});
+
+			window.onresize = function () {
+				editor.layout();
+			};
+
+			GetText = function () {
+				return editor.getValue();
+			}
+
+			SetText = function (x) {
+				editor.setValue(x);
+			}
+
+			AddIntellisense = function(l, k, d, i) {
+				var t;
+				switch (k) {
+					case "Class":
+						t = monaco.languages.CompletionItemKind.Class;
+						break;
+					case "Color":
+						t = monaco.languages.CompletionItemKind.Color;
+						break;
+					case "Constructor":
+						t = monaco.languages.CompletionItemKind.Constructor;
+						break;
+					case "Enum":
+						t = monaco.languages.CompletionItemKind.Enum;
+						break;
+					case "Field":
+						t = monaco.languages.CompletionItemKind.Field;
+						break;
+					case "File":
+						t = monaco.languages.CompletionItemKind.File;
+						break;
+					case "Folder":
+						t = monaco.languages.CompletionItemKind.Folder;
+						break;
+					case "Function":
+						t = monaco.languages.CompletionItemKind.Function;
+						break;
+					case "Interface":
+						t = monaco.languages.CompletionItemKind.Interface;
+						break;
+					case "Keyword":
+						t = monaco.languages.CompletionItemKind.Keyword;
+						break;
+					case "Method":
+						t = monaco.languages.CompletionItemKind.Method;
+						break;
+					case "Module":
+						t = monaco.languages.CompletionItemKind.Module;
+						break;
+					case "Property":
+						t = monaco.languages.CompletionItemKind.Property;
+						break;
+					case "Reference":
+						t = monaco.languages.CompletionItemKind.Reference;
+						break;
+					case "Snippet":
+						t = monaco.languages.CompletionItemKind.Snippet;
+						break;
+					case "Text":
+						t = monaco.languages.CompletionItemKind.Text;
+						break;
+					case "Unit":
+						t = monaco.languages.CompletionItemKind.Unit;
+						break;
+					case "Value":
+						t = monaco.languages.CompletionItemKind.Value;
+						break;
+					case "Variable":
+						t = monaco.languages.CompletionItemKind.Variable;
+						break;
+				}
+
+				Proposals.push({
+					label: l,
+					kind: t,
+					detail: d,
+					insertText: i
+				});
+			}
+
+			Refresh = function() {
+					var text = GetText();
+					SetText("");
+					editor.trigger('keyboard', 'type', {text: text});
+				}
+		});
+	</script>
+</body>
+
+</html>
