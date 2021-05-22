@@ -4,6 +4,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Text;
+using System.Web;
 using System.Threading.Tasks;
 
 namespace Zeus
@@ -28,8 +29,7 @@ namespace Zeus
         }
 
         protected virtual void OnEditorReady()
-        {
-            isDOMLoaded = true;
+        { 
             EventHandler handler = EditorReady;
             if (handler != null)
                 handler(this, new EventArgs());
@@ -48,7 +48,8 @@ namespace Zeus
         private async void CoreWebView2_DOMContentLoaded(object sender, Microsoft.Web.WebView2.Core.CoreWebView2DOMContentLoadedEventArgs e)
         {
             await Task.Delay(1000);
-            await this.CoreWebView2.ExecuteScriptAsync($"SetText(`{ToSetText}`)");
+            isDOMLoaded = true;
+            SetText(ToSetText);
             OnEditorReady();
         }
 
@@ -76,8 +77,8 @@ namespace Zeus
         /// <param name="text"></param>
         public void SetText(string text)
         {
-            if (isDOMLoaded)
-                CoreWebView2.ExecuteScriptAsync($"SetText(`{text}`)");
+              if (isDOMLoaded)
+                await CoreWebView2.ExecuteScriptAsync($"SetText(\"{HttpUtility.JavaScriptStringEncode(text)}\")");
         }
 
         /// <summary>
